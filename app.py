@@ -17,7 +17,7 @@ handler = WebhookHandler(CHANNEL_SECRET)
 # endpoint
 @app.route("/")
 def test():
-    return "<h1>It Works!</h1>"
+    return "<h1>Hello LineBot!</h1>"
 
 # endpoint from linebot
 @app.route("/callback", methods=['POST'])
