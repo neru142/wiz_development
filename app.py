@@ -27,6 +27,12 @@ handler = WebhookHandler(CHANNEL_SECRET)
 
 # Pythonでは呼び出す行より上に記述しないとエラーになる
 
+
+# endpoint
+@app.route("/")
+def test():
+    return "<h1>Hello World!</h1>"
+
 # リストをn個ずつのサブリストに分割する
 # l : リスト
 # n : サブリストの要素数
