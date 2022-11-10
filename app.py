@@ -28,10 +28,10 @@ handler = WebhookHandler(CHANNEL_SECRET)
 # Pythonでは呼び出す行より上に記述しないとエラーになる
 
 
-# endpoint
-@app.route("/")
-def test():
-    return "<h1>Hello World!</h1>"
+# # endpoint
+# @app.route("/")
+# def test():
+#     return "<h1>Hello World!</h1>"
 
 # リストをn個ずつのサブリストに分割する
 # l : リスト
@@ -166,80 +166,39 @@ def handle_follow(event):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=profile.display_name + "さん、はじめまして！\n" +
-        "友だち追加ありがとうございます。ナビふくくんです。\n" +
-        "お探しの窓口をご案内しますので、まずは「カテゴリ選択」をタップしてください。")
+        "友だち追加ありがとうございます。福島温泉情報bot（仮）です。\n" +
+        "温泉の情報を探したい場合は、まずは「温泉を探す」をタップしてください。")
     )
 
 # メッセージイベントの場合の処理
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     content = event.message.text # メッセージの内容を取得する
-    if content in ['カテゴリ選択']:
+    if content in ['温泉を探す']:
         carousel_columns = [
             CarouselColumn(
                 text='カテゴリを選択してください',
                 title='カテゴリ選択',
                 actions=[
                     PostbackTemplateAction(
-                        label='医療・保健・福祉関連',
+                        label='場所',
                         data='callback',
-                        text='医療・保健・福祉関連'
+                        text='場所'
                         
                     ),
                     PostbackTemplateAction(
-                        label='震災・復旧・復興関連',
+                        label='効能',
                         data='callback',
-                        text='震災・復旧・復興関連'
+                        text='効能'
                     ),
                     PostbackTemplateAction(
-                        label='生活関連',
+                        label='景色',
                         data='callback',
-                        text='生活関連'
-                    )
-                ]
-            ),
-            CarouselColumn(
-                text='カテゴリを選択してください',
-                title='カテゴリ選択',
-                actions=[
-                    PostbackTemplateAction(
-                        label='環境関連',
-                        data='callback',
-                        text='環境関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='産業・労働・就業関連',
-                        data='callback',
-                        text='産業・労働・就業関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='警察・犯罪関連',
-                        data='callback',
-                        text='警察・犯罪関連'
-                    )
-                ]
-            ),
-            CarouselColumn(
-                text='カテゴリを選択してください',
-                title='カテゴリ選択',
-                actions=[
-                    PostbackTemplateAction(
-                        label='パスポート・外国人関連',
-                        data='callback',
-                        text='パスポート・外国人関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='教育関連',
-                        data='callback',
-                        text='教育関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='県政相談',
-                        data='callback',
-                        text='県政相談'
+                        text='景色'
                     )
                 ]
             )
+            
         ]
         message_template = CarouselTemplate(columns=carousel_columns)
         line_bot_api.reply_message(
