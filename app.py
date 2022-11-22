@@ -160,35 +160,35 @@ def handle_follow(event):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=profile.display_name + "さん、はじめまして！\n" +
-        "友だち追加ありがとうございます。福島温泉情報bot（仮）です。\n" +
-        "温泉の情報を探したい場合は、まずは「温泉を探す」をタップしてください。")
+        "友だち追加ありがとうございます。ナビふくくんです。\n" +
+        "お探しの窓口をご案内しますので、まずは「カテゴリ選択」をタップしてください。")
     )
 
 # メッセージイベントの場合の処理
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     content = event.message.text # メッセージの内容を取得する
-    if content in ['温泉を探す']:
+    if content in ['カテゴリ選択']:
         carousel_columns = [
             CarouselColumn(
                 text='カテゴリを選択してください',
                 title='カテゴリ選択',
                 actions=[
                     PostbackTemplateAction(
-                        label='場所',
+                        label='医療・保健・福祉関連',
                         data='callback',
-                        text='場所'
+                        text='医療・保健・福祉関連'
                         
                     ),
                     PostbackTemplateAction(
-                        label='効能',
+                        label='震災・復旧・復興関連',
                         data='callback',
-                        text='効能'
+                        text='震災・復旧・復興関連'
                     ),
                     PostbackTemplateAction(
-                        label='景色',
+                        label='生活関連',
                         data='callback',
-                        text='景色'
+                        text='生活関連'
                     )
                 ]
             ),
@@ -197,46 +197,40 @@ def handle_message(event):
                 title='カテゴリ選択',
                 actions=[
                     PostbackTemplateAction(
-                        label='旅館',
+                        label='環境関連',
                         data='callback',
-                        text='旅館'
-                        
+                        text='環境関連'
                     ),
                     PostbackTemplateAction(
-                        label='温度',
+                        label='産業・労働・就業関連',
                         data='callback',
-                        text='温度'
+                        text='産業・労働・就業関連'
+                    ),
+                    PostbackTemplateAction(
+                        label='警察・犯罪関連',
+                        data='callback',
+                        text='警察・犯罪関連'
                     )
                 ]
-            )
-            
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['場所']:
-        carousel_columns = [
+            ),
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
+                text='カテゴリを選択してください',
+                title='カテゴリ選択',
+                actions=[
                     PostbackTemplateAction(
-                        label = '会津',
-                        data = 'callback',
-                        text = '会津'
+                        label='パスポート・外国人関連',
+                        data='callback',
+                        text='パスポート・外国人関連'
                     ),
                     PostbackTemplateAction(
-                        label = '中通り',
-                        data = 'callback',
-                        text = '中通り'
+                        label='教育関連',
+                        data='callback',
+                        text='教育関連'
                     ),
                     PostbackTemplateAction(
-                        label = '浜通り',
-                        data = 'callback',
-                        text = '浜通り'
+                        label='県政相談',
+                        data='callback',
+                        text='県政相談'
                     )
                 ]
             )
@@ -247,21 +241,47 @@ def handle_message(event):
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
 
-    elif content in ['効能']:
+    elif content in ['医療・保健・福祉関連']:
         carousel_columns = [
             CarouselColumn(
                 text = '分野を選択してください',
                 title = '分野選択',
                 actions = [
                     PostbackTemplateAction(
-                        label = '肩こり解消',
+                        label = '保険・福祉',
                         data = 'callback',
-                        text = '肩こり解消'
+                        text = '保険・福祉'
                     ),
                     PostbackTemplateAction(
-                        label ='肌に良い',
+                        label = '救急・医療',
                         data = 'callback',
-                        text = '肌に良い'
+                        text = '救急・医療'
+                    ),
+                    PostbackTemplateAction(
+                        label = '障がい者',
+                        data = 'callback',
+                        text = '障がい者'
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text = '分野を選択してください',
+                title = '分野選択',
+                actions =[
+                    PostbackTemplateAction(
+                        label = '精神',
+                        data = 'callback',
+                        text = '精神'
+                    ),
+                    PostbackTemplateAction(
+                        label = '女性',
+                        data = 'callback',
+                        text = '女性'
+                    ),
+                    PostbackTemplateAction(
+                        label = '健康・生活',
+                        data = 'callback',
+                        text = '健康・生活'
                     )
                 ]
             )
@@ -272,47 +292,37 @@ def handle_message(event):
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
 
-    elif content in ['景色']:
+    elif content in ['震災・復旧・復興関連']:
         carousel_columns = [
             CarouselColumn(
                 text = '分野を選択してください',
                 title = '分野選択',
                 actions = [
                     PostbackTemplateAction(
-                        label = '雪景色',
+                        label = '原発',
                         data = 'callback',
-                        text = '雪景色'
+                        text = '原発'
                     ),
                     PostbackTemplateAction(
-                        label = '紅葉',
+                        label = '生活',
                         data = 'callback',
-                        text = '紅葉'
+                        text = '生活'
                     )
                 ]
-            )
-            
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['温度']:
-        carousel_columns = [
+            ),
             CarouselColumn(
                 text = '分野を選択してください',
                 title = '分野選択',
                 actions = [
                     PostbackTemplateAction(
-                        label = '熱い',
+                        label = '企業・経営',
                         data = 'callback',
-                        text = '熱い'
+                        text = '企業・経営'
                     ),
                     PostbackTemplateAction(
-                        label = 'ぬるい',
+                        label = '復興支援',
                         data = 'callback',
-                        text = 'ぬるい'
+                        text = '復興支援'
                     )
                 ]
             )
@@ -323,21 +333,193 @@ def handle_message(event):
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
 
-    elif content in ['旅館']:
+    elif content in ['生活関連']:
         carousel_columns = [
             CarouselColumn(
                 text = '分野を選択してください',
                 title = '分野選択',
                 actions = [
                     PostbackTemplateAction(
-                        label = '高い',
+                        label = '事故',
                         data = 'callback',
-                        text = '高い'
+                        text = '事故'
                     ),
                     PostbackTemplateAction(
-                        label = '安い',
+                        label = '生活・人間関係',
                         data = 'callback',
-                        text = '安い'
+                        text = '生活・人間関係'
+                    ),  
+                ]
+            ),
+            CarouselColumn(
+                text = '分野を選択してください',
+                title = '分野選択',
+                actions = [
+                    PostbackTemplateAction(
+                        label = '食品・安全',
+                        data = 'callback',
+                        text = '食品・安全'
+                    ),
+                    PostbackTemplateAction(
+                        label = 'その他',
+                        data = 'callback',
+                        text = 'その他'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+    elif content in ['環境関連']:
+        carousel_columns = [
+            CarouselColumn(
+                text = '分野を選択してください',
+                title = '分野選択',
+                actions = [
+                    PostbackTemplateAction(
+                        label = '環境問題',
+                        data = 'callback',
+                        text = '環境問題'
+                    ),
+                    PostbackTemplateAction(
+                        label = '公害・廃棄物',
+                        data = 'callback',
+                        text = '公害・廃棄物'
+                    ),
+                    PostbackTemplateAction(
+                        label = '環境保全活動',
+                        data = 'callback',
+                        text = '環境保全活動'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+    elif content in ['産業・労働・就業関連']:
+        carousel_columns = [
+            CarouselColumn(
+                text = '分野を選択してください',
+                title = '分野選択',
+                actions = [
+                    PostbackTemplateAction(
+                        label = '労働環境',
+                        data = 'callback',
+                        text = '労働環境'
+                    ),
+                    PostbackTemplateAction(
+                        label = '経営',
+                        data = 'callback',
+                        text = '経営'
+                    ),
+                    PostbackTemplateAction(
+                        label = '産業',
+                        data = 'callback',
+                        text = '産業'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+    elif content in ['警察・犯罪関連']:
+        carousel_columns = [
+            CarouselColumn(
+                text = '分野を選択してください',
+                title = '分野選択',
+                actions = [
+                    PostbackTemplateAction(
+                        label = '安全相談',
+                        data = 'callback',
+                        text = '安全相談'
+                    ),
+                    PostbackTemplateAction(
+                        label = '交通安全',
+                        data = 'callback',
+                        text = '交通安全'
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text = '分野を選択してください',
+                title = '分野選択',
+                actions = [
+                    PostbackTemplateAction(
+                        label = 'いじめ・子ども相談',
+                        data = 'callback',
+                        text = 'いじめ・子ども相談'
+                    ),
+                    PostbackTemplateAction(
+                        label = '犯罪関連',
+                        data = 'callback',
+                        text = '犯罪関連'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+    
+    elif content in ['パスポート・外国人関連']:
+        carousel_columns = [
+            CarouselColumn(
+                text = '分野を選択してください',
+                title = '分野選択',
+                actions = [
+                    PostbackTemplateAction(
+                        label = 'パスポート',
+                        data = 'callback',
+                        text = 'パスポート'
+                    ),
+                    PostbackTemplateAction(
+                        label = '外国人向け相談窓口',
+                        data = 'callback',
+                        text = '外国人向け相談窓口'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+    elif content in ['教育関連']:
+        carousel_columns = [
+            CarouselColumn(
+                text = '分野を選択してください',
+                title = '分野選択',
+                actions = [
+                    PostbackTemplateAction(
+                        label = '教育相談',
+                        data = 'callback',
+                        text = '教育相談'
+                    ),
+                    PostbackTemplateAction(
+                        label = '障がい児関連',
+                        data = 'callback',
+                        text = '障がい児関連'
+                    ),
+                    PostbackTemplateAction(
+                        label = '調査・文化財',
+                        data = 'callback',
+                        text = '調査・文化財'
                     )
                 ]
             )
@@ -349,7 +531,7 @@ def handle_message(event):
         )
 
     # 以下サブカテゴリ
-    elif content in ['会津']:
+    elif content in ['保険・福祉']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 21 ORDER BY Id ASC")
@@ -362,7 +544,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['中通り']:
+    elif content in ['救急・医療']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 22 ORDER BY Id ASC")
@@ -375,7 +557,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['浜通り']:
+    elif content in ['障がい者']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 23 ORDER BY Id ASC")
@@ -388,7 +570,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['肩こり解消']:
+    elif content in ['精神']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 24 ORDER BY Id ASC")
@@ -401,7 +583,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
     
-    elif content in ['肌に良い']:
+    elif content in ['女性']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 25 ORDER BY Id ASC")
@@ -414,7 +596,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['雪景色']:
+    elif content in ['健康・生活']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 26 ORDER BY Id ASC")
@@ -427,7 +609,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['紅葉']:
+    elif content in ['原発']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 31 ORDER BY Id ASC")
@@ -440,7 +622,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['熱い']:
+    elif content in ['生活']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 32 ORDER BY Id ASC")
@@ -453,7 +635,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['ぬるい']:
+    elif content in ['企業・経営']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 33 ORDER BY Id ASC")
@@ -466,7 +648,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['高い']:
+    elif content in ['復興支援']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 34 ORDER BY Id ASC")
@@ -479,7 +661,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['安い']:
+    elif content in ['事故']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 41 ORDER BY Id ASC")
@@ -491,33 +673,6 @@ def handle_message(event):
             event.reply_token,
             FlexSendMessage(alt_text='flex template', contents=result)
         )
-
-
-
-
-
-
-
-
-
-
-
-
-##----------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     elif content in ['生活・人間関係']:
         with psycopg2.connect(DATABASE_URL) as conn:
@@ -740,33 +895,6 @@ def handle_message(event):
             event.reply_token,
             FlexSendMessage(alt_text='flex template', contents=result)
         )
-
-
-
-
-
-
-
-
-
-
-
-##------------------------------------------------------------------
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
     # 以下 下位分類のあるサブカテゴリ
     elif content in ['産業']:
