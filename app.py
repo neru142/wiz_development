@@ -28,7 +28,7 @@ handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
 # 温泉のjson1ファイルを取得
 
-with open('sample.json',encoding="utf-8") as f:
+with open('onsendate.json',encoding="utf-8") as f:
     jsn =json.load(f)
 
 # Pythonでは呼び出す行より上に記述しないとエラーになる
