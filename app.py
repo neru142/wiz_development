@@ -1,6 +1,7 @@
 from flask import Flask, request, abort
 import os
 import psycopg2
+import json
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -24,6 +25,11 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
+
+# 温泉のjson1ファイルを取得
+
+with open('sample.json',encoding="utf-8") as f:
+    jsn =json.load(f)
 
 # Pythonでは呼び出す行より上に記述しないとエラーになる
 
@@ -171,45 +177,39 @@ def handle_message(event):
     if content in ['温泉を探す']:
         carousel_columns = [
             CarouselColumn(
-                text='カテゴリを選択してください',
-                title='カテゴリ選択',
+                text='希望する地方を選択してください',
+                title='会津で検索',
                 actions=[
                     PostbackTemplateAction(
-                        label='場所',
+                        label='会津',
                         data='callback',
-                        text='場所'
-                        
-                    ),
-                    PostbackTemplateAction(
-                        label='効能',
-                        data='callback',
-                        text='効能'
-                    ),
-                    PostbackTemplateAction(
-                        label='景色',
-                        data='callback',
-                        text='景色'
+                        text='会津'   
                     )
                 ]
             ),
             CarouselColumn(
-                text='カテゴリを選択してください',
-                title='カテゴリ選択',
+                text='希望する地方を選択してください',
+                title='中通りで検索',
                 actions=[
                     PostbackTemplateAction(
-                        label='旅館',
+                        label='中通り',
                         data='callback',
-                        text='旅館'
-                        
-                    ),
+                        text='中通り'
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する地方を選択してください',
+                title='浜通りで検索',
+                actions=[
                     PostbackTemplateAction(
-                        label='温度',
+                        label='浜通り',
                         data='callback',
-                        text='温度'
+                        text='浜通り'
                     )
                 ]
             )
-            
+
         ]
         message_template = CarouselTemplate(columns=carousel_columns)
         line_bot_api.reply_message(
@@ -217,7 +217,7 @@ def handle_message(event):
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
 
-    elif content in ['場所']:
+    elif content in ['会津']:
         carousel_columns = [
             CarouselColumn(
                 text = '分野を選択してください',
@@ -247,7 +247,7 @@ def handle_message(event):
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
 
-    elif content in ['効能']:
+    elif content in ['中通り']:
         carousel_columns = [
             CarouselColumn(
                 text = '分野を選択してください',
@@ -272,7 +272,7 @@ def handle_message(event):
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
 
-    elif content in ['景色']:
+    elif content in ['浜通り']:
         carousel_columns = [
             CarouselColumn(
                 text = '分野を選択してください',
