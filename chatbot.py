@@ -84,7 +84,7 @@ def window_list_flex(db):
         )
         
     return CarouselContainer(contents=contents_carousel)
-'''
+
 # 窓口の情報を出力
 def window_info(db):
     result = db[0][4] + "\n"\
@@ -92,7 +92,7 @@ def window_info(db):
         + db[0][6] + "\n"\
         + db[0][7]
     return result
-
+'''
 # ブラウザでherokuにアクセスした場合の処理
 @app.route("/")
 def hello_world():
@@ -191,87 +191,11 @@ def handle_message(event):
                         label='浜通り',
                         data='callback',
                         text='浜通り'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-        rs_ = "地方が決まっていない場合は、泉質でも検索できます。"
-
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=rs_)) 
-
-        carousel_columns = [
-            CarouselColumn(
-                text='希望する泉質を選択してください',
-                title='泉質名を選択',
-                actions=[
-                    PostbackTemplateAction(
-                        label = '単純温泉',
-                        data = 'callback',
-                        text = '単純温泉'
                     ),
                     PostbackTemplateAction(
-                        label = '塩化物泉',
-                        data = 'callback',
-                        text = '塩化物泉'
-                    ),
-                    PostbackTemplateAction(
-                        label = '炭酸水素塩泉',
-                        data = 'callback',
-                        text = '炭酸水素塩泉'
-                    )
-                    PostbackTemplateAction(
-                        label = '含よう素泉',
-                        data = 'callback',
-                        text = '含よう素泉'
-                    )
-                ]
-            ),
-            CarouselColumn(
-                text = '希望する泉質を選択してください',
-                title = '泉質名を選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '硫酸塩泉',
-                        data = 'callback',
-                        text = '硫酸塩泉'
-                    ),
-                    PostbackTemplateAction(
-                        label = '二酸化炭素泉',
-                        data = 'callback',
-                        text = '二酸化炭素泉'
-                    ),
-                    PostbackTemplateAction(
-                        label = '含鉄泉',
-                        data = 'callback',
-                        text = '含鉄泉'
-                    )
-                ]
-            ),
-            CarouselColumn(
-                text = '希望する泉質を選択してください',
-                title = '泉質名を選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '硫黄泉',
-                        data = 'callback',
-                        text = '硫黄泉'
-                    ),
-                    PostbackTemplateAction(
-                        label = '酸性泉',
-                        data = 'callback',
-                        text = '酸性泉'
-                    ),
-                    PostbackTemplateAction(
-                        label = '放射能泉',
-                        data = 'callback',
-                        text = '放射能泉'
+                        label='地域が決まっていない',
+                        data='callback',
+                        text='地域が決まっていない'
                     )
                 ]
             )
