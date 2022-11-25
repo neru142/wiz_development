@@ -194,7 +194,7 @@ def handle_message(event):
                 ]
             ),
             CarouselColumn(
-                text='どちらを気にしますか？',
+                text='温泉の泉質優先の方',
                 title='地域での指定がない',
                 actions=[
                     PostbackTemplateAction(
