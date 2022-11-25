@@ -203,17 +203,6 @@ def handle_message(event):
                         text='中通り'
                     )
                 ]
-            ),
-            CarouselColumn(
-                text='希望の地方を選択してください',
-                title='浜通りで探す',
-                actions=[
-                    PostbackTemplateAction(
-                        label='浜通り',
-                        data='callback',
-                        text='浜通り'
-                    )
-                ]
             )
         ]
         message_template = CarouselTemplate(columns=carousel_columns)
@@ -1149,7 +1138,7 @@ def handle_message(event):
 
     # 「最初から」がタップされた場合の処理
     elif content in ['最初から']:
-        response = "改めて窓口を探す際には、もう一度「温泉を探す」をタップしてください。"
+        response = "改めて窓口を探す際には、もう一度「カテゴリ選択」をタップしてください。"
 
         line_bot_api.reply_message(
             event.reply_token,
