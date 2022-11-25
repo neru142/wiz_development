@@ -35,7 +35,6 @@ def split_list(l, n):
         yield l[idx:idx + n]
 
 # 窓口リストを表示する関数
-'''
 def window_list_flex(db):
     db.append(
         (1,1,1,
@@ -92,7 +91,7 @@ def window_info(db):
         + db[0][6] + "\n"\
         + db[0][7]
     return result
-'''
+
 # ブラウザでherokuにアクセスした場合の処理
 @app.route("/")
 def hello_world():
