@@ -168,27 +168,27 @@ def handle_follow(event):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     content = event.message.text # メッセージの内容を取得する
-    if content in ['カテゴリ選択']:
+    if content in ['温泉を探す']:
         carousel_columns = [
             CarouselColumn(
                 text='カテゴリを選択してください',
                 title='カテゴリ選択',
                 actions=[
                     PostbackTemplateAction(
-                        label='医療・保健・福祉関連',
-                        data='callback',
-                        text='医療・保健・福祉関連'
-                        
+                            label='会津',
+                            data='callback',
+                            text='会津'
+                            
                     ),
                     PostbackTemplateAction(
-                        label='震災・復旧・復興関連',
+                        label='中通り',
                         data='callback',
-                        text='震災・復旧・復興関連'
+                        text='中通り'
                     ),
                     PostbackTemplateAction(
-                        label='生活関連',
+                        label='浜通り',
                         data='callback',
-                        text='生活関連'
+                        text='浜通り'
                     )
                 ]
             ),
@@ -197,19 +197,14 @@ def handle_message(event):
                 title='カテゴリ選択',
                 actions=[
                     PostbackTemplateAction(
-                        label='環境関連',
+                        label='温泉の泉質',
                         data='callback',
-                        text='環境関連'
+                        text='温泉の泉質'
                     ),
                     PostbackTemplateAction(
-                        label='産業・労働・就業関連',
+                        label='景色',
                         data='callback',
-                        text='産業・労働・就業関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='警察・犯罪関連',
-                        data='callback',
-                        text='警察・犯罪関連'
+                        text='景色'
                     )
                 ]
             ),
