@@ -190,53 +190,6 @@ def handle_message(event):
                         label='浜通り',
                         data='callback',
                         text='浜通り'
-                    ),
-                    PostbackTemplateAction(
-                        label='地域が決まっていない',
-                        data='callback',
-                        text='地域が決まっていない'
-                    )
-                ]
-            ),
-            CarouselColumn(
-                text='カテゴリを選択してください',
-                title='カテゴリ選択',
-                actions=[
-                    PostbackTemplateAction(
-                        label='環境関連',
-                        data='callback',
-                        text='環境関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='産業・労働・就業関連',
-                        data='callback',
-                        text='産業・労働・就業関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='警察・犯罪関連',
-                        data='callback',
-                        text='警察・犯罪関連'
-                    )
-                ]
-            ),
-            CarouselColumn(
-                text='カテゴリを選択してください',
-                title='カテゴリ選択',
-                actions=[
-                    PostbackTemplateAction(
-                        label='パスポート・外国人関連',
-                        data='callback',
-                        text='パスポート・外国人関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='教育関連',
-                        data='callback',
-                        text='教育関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='県政相談',
-                        data='callback',
-                        text='県政相談'
                     )
                 ]
             )
