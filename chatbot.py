@@ -194,23 +194,24 @@ def handle_message(event):
                 ]
             ),
             CarouselColumn(
-                text='カテゴリを選択してください',
-                title='カテゴリ選択',
+                text='希望の地方を選択してください',
+                title='中通りで探す',
                 actions=[
                     PostbackTemplateAction(
-                        label='環境関連',
+                        label='中通り',
                         data='callback',
-                        text='環境関連'
-                    ),
+                        text='中通り'
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望の地方を選択してください',
+                title='浜通りで探す',
+                actions=[
                     PostbackTemplateAction(
-                        label='産業・労働・就業関連',
+                        label='浜通り',
                         data='callback',
-                        text='産業・労働・就業関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='警察・犯罪関連',
-                        data='callback',
-                        text='警察・犯罪関連'
+                        text='浜通り'
                     )
                 ]
             )
