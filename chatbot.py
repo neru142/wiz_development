@@ -84,7 +84,7 @@ def window_list_flex(db):
         )
         
     return CarouselContainer(contents=contents_carousel)
-
+'''
 # 窓口の情報を出力
 def window_info(db):
     result = db[0][4] + "\n"\
@@ -92,7 +92,7 @@ def window_info(db):
         + db[0][6] + "\n"\
         + db[0][7]
     return result
-'''
+
 # ブラウザでherokuにアクセスした場合の処理
 @app.route("/")
 def hello_world():
