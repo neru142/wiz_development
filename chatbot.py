@@ -192,17 +192,10 @@ def handle_message(event):
                         text='浜通り'
                     )
                 ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-        carousel_columns = [
+            ),
             CarouselColumn(
                 text='場所より景色や泉質で検索',
-                title='地域指定がない方',
+                title='地域指定無',
                 actions=[
                     PostbackTemplateAction(
                         label='温泉の泉質',
