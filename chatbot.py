@@ -198,14 +198,14 @@ def handle_message(event):
                     )
                 ]
             )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-        line_bot_api.reply_message(event.reply_token,TextSendMessage(text="希望の地方が分からない場合は\n泉質などからも選択できます"))
-        carousel_columns = [
+#         ]
+#         message_template = CarouselTemplate(columns=carousel_columns)
+#         line_bot_api.reply_message(
+#             event.reply_token,
+#             TemplateSendMessage(alt_text='carousel template', template=message_template)
+#         )
+#         line_bot_api.reply_message(event.reply_token,TextSendMessage(text="希望の地方が分からない場合は\n泉質などからも選択できます"))
+#         carousel_columns = [
             CarouselColumn(
                 text='希望する泉質を選択してください',
                 title='希望泉質',
