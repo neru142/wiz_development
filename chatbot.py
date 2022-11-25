@@ -192,6 +192,22 @@ def handle_message(event):
                         text='浜通り'
                     )
                 ]
+            ),
+            CarouselColumn(
+                text='場所より景色や泉質で検索',
+                title='地域指定がない方',
+                actions=[
+                    PostbackTemplateAction(
+                        label='温泉の泉質',
+                        data='callback',
+                        text='温泉の泉質'
+                    ),
+                    PostbackTemplateAction(
+                        label='景色',
+                        data='callback',
+                        text='景色'
+                    )
+                ]
             )
         ]
         message_template = CarouselTemplate(columns=carousel_columns)
