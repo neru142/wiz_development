@@ -194,7 +194,7 @@ def handle_message(event):
                 ]
             ),
             CarouselColumn(
-                text='質や景色などの指定で場所は気にしない方',
+                text='どちらを気にしますか？',
                 title='地域での指定がない',
                 actions=[
                     PostbackTemplateAction(
