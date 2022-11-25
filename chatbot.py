@@ -160,8 +160,9 @@ def handle_follow(event):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=profile.display_name + "さん、はじめまして！\n" +
-        "友だち追加ありがとうございます。ナビふくくんです。\n" +
-        "お探しの窓口をご案内しますので、まずは「カテゴリ選択」をタップしてください。")
+        "友だち追加ありがとうございます。温泉情報botです。\n" +
+        "福島県の温泉を探す場合、まずは「温泉を探す」をタップしてください。\n" +
+        "泉質名についての説明が欲しい場合は、helpをタップしてください。")
     )
 
 # メッセージイベントの場合の処理
@@ -171,14 +172,14 @@ def handle_message(event):
     if content in ['温泉を探す']:
         carousel_columns = [
             CarouselColumn(
-                text='カテゴリを選択してください',
-                title='カテゴリ選択',
+                text='希望の地方を選択する',
+                title='地方選択',
                 actions=[
                     PostbackTemplateAction(
-                            label='会津',
-                            data='callback',
-                            text='会津'
-                            
+                        label='会津',
+                        data='callback',
+                        text='会津'
+                        
                     ),
                     PostbackTemplateAction(
                         label='中通り',
@@ -192,48 +193,27 @@ def handle_message(event):
                     )
                 ]
             ),
-            CarouselColumn(
-                text='カテゴリを選択してください',
-                title='カテゴリ選択',
+             CarouselColumn(
+                text='場所より景色や泉質で検索',
+                title='地域指定がない方',
                 actions=[
+                    PostbackTemplateAction(
+                        label='景色',
+                        data='callback',
+                        text='景色'
+                    ),
                     PostbackTemplateAction(
                         label='温泉の泉質',
                         data='callback',
                         text='温泉の泉質'
                     ),
                     PostbackTemplateAction(
-                        label='景色',
+                        label='そのうち追加',
                         data='callback',
-                        text='景色'
-                    ),
-                    PostbackTemplateAction(
-                        label='景色',
-                        data='callback',
-                        text='景色'
-                    ) 
-                ]
-            ),
-            CarouselColumn(
-                text='カテゴリを選択してください',
-                title='カテゴリ選択',
-                actions=[
-                    PostbackTemplateAction(
-                        label='パスポート・外国人関連',
-                        data='callback',
-                        text='パスポート・外国人関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='教育関連',
-                        data='callback',
-                        text='教育関連'
-                    ),
-                    PostbackTemplateAction(
-                        label='県政相談',
-                        data='callback',
-                        text='県政相談'
+                        text='そのうち追加'
                     )
                 ]
-            )
+             )
         ]
         message_template = CarouselTemplate(columns=carousel_columns)
         line_bot_api.reply_message(
@@ -1168,7 +1148,7 @@ def handle_message(event):
 
     # 「最初から」がタップされた場合の処理
     elif content in ['最初から']:
-        response = "改めて窓口を探す際には、もう一度「カテゴリ選択」をタップしてください。"
+        response = "改めて窓口を探す際には、もう一度「温泉を探す」をタップしてください。"
 
         line_bot_api.reply_message(
             event.reply_token,
