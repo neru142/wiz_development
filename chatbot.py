@@ -169,7 +169,7 @@ def handle_follow(event):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     content = event.message.text # メッセージの内容を取得する
-    if content in ['温泉を探す']:
+        if content in ['温泉を探す']:
         carousel_columns = [
             CarouselColumn(
                 text='希望の地方を選択する',
@@ -194,18 +194,23 @@ def handle_message(event):
                 ]
             ),
             CarouselColumn(
-                text='温泉の泉質優先の方',
-                title='地域での指定がない',
+                text='カテゴリを選択してください',
+                title='カテゴリ選択',
                 actions=[
                     PostbackTemplateAction(
-                        label='温泉の泉質',
+                        label='環境関連',
                         data='callback',
-                        text='温泉の泉質'
+                        text='環境関連'
                     ),
                     PostbackTemplateAction(
-                        label='景色',
+                        label='産業・労働・就業関連',
                         data='callback',
-                        text='景色'
+                        text='産業・労働・就業関連'
+                    ),
+                    PostbackTemplateAction(
+                        label='警察・犯罪関連',
+                        data='callback',
+                        text='警察・犯罪関連'
                     )
                 ]
             )
