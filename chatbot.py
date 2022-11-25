@@ -27,12 +27,6 @@ handler = WebhookHandler(CHANNEL_SECRET)
 
 # Pythonでは呼び出す行より上に記述しないとエラーになる
 
-
-# endpoint
-@app.route("/")
-def test():
-    return "<h1>Hello World!</h1>"
-
 # リストをn個ずつのサブリストに分割する
 # l : リスト
 # n : サブリストの要素数
@@ -166,31 +160,45 @@ def handle_follow(event):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=profile.display_name + "さん、はじめまして！\n" +
-        "友だち追加ありがとうございます。ナビふくくんです。\n" +
-        "お探しの窓口をご案内しますので、まずは「カテゴリ選択」をタップしてください。")
+        "友だち追加ありがとうございます。温泉情報botです。\n" +
+        "福島県の温泉を探す場合、まずは「温泉を探す」をタップしてください。\n" +
+        "泉質名についての説明が欲しい場合は、helpをタップしてください。")
     )
 
 # メッセージイベントの場合の処理
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     content = event.message.text # メッセージの内容を取得する
+
+    # 「温泉を探す」を受け取った場合の処理
     if content in ['温泉を探す']:
         carousel_columns = [
             CarouselColumn(
-                text='希望する地方を選択してください',
-                title='地方選択',
+                text='希望の地方を選択してください',
+                title='会津で探す',
                 actions=[
                     PostbackTemplateAction(
                         label='会津',
                         data='callback',
                         text='会津'
-                        
-                    ),
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望の地方を選択してください',
+                title='中通りで探す',
+                actions=[
                     PostbackTemplateAction(
                         label='中通り',
                         data='callback',
                         text='中通り'
-                    ),
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望の地方を選択してください',
+                title='浜通りで探す',
+                actions=[
                     PostbackTemplateAction(
                         label='浜通り',
                         data='callback',
@@ -198,130 +206,87 @@ def handle_message(event):
                     )
                 ]
             )
-#         ]
-#         message_template = CarouselTemplate(columns=carousel_columns)
-#         line_bot_api.reply_message(
-#             event.reply_token,
-#             TemplateSendMessage(alt_text='carousel template', template=message_template)
-#         )
-#         line_bot_api.reply_message(event.reply_token,TextSendMessage(text="希望の地方が分からない場合は\n泉質などからも選択できます"))
-#         carousel_columns = [
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+    # 「会津」を受け取った場合の処理
+    elif content in ['会津']:
+        carousel_columns = [
             CarouselColumn(
-                text='希望する泉質を選択してください',
-                title='希望泉質',
-                actions=[
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
+                actions = [
                     PostbackTemplateAction(
-                        label='単純温泉',
-                        data='callback',
-                        text='単純温泉'
+                        label = '単純温泉',
+                        data = 'callback',
+                        text = '単純温泉'
                     ),
                     PostbackTemplateAction(
-                        label='塩化物泉',
-                        data='callback',
-                        text='塩化物泉'
+                        label = '塩化物泉',
+                        data = 'callback',
+                        text = '塩化物泉'
                     ),
                     PostbackTemplateAction(
-                        label='炭酸水素塩泉',
-                        data='callback',
-                        text='炭酸水素塩泉'
-                    )
-                    PostbackTemplateAction(
-                        label='含よう素泉',
-                        data='callback',
-                        text='含よう素泉'
+                        label = '炭酸水素塩泉',
+                        data = 'callback',
+                        text = '炭酸水素塩泉'
                     )
                 ]
             ),
             CarouselColumn(
-                text='希望する泉質を選択してください',
-                title='希望泉質',
-                actions=[
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
+                actions = [
                     PostbackTemplateAction(
-                        label='硫酸塩泉',
-                        data='callback',
-                        text='硫酸塩泉'
+                        label = '硫酸塩泉',
+                        data = 'callback',
+                        text = '硫酸塩泉'
                     ),
                     PostbackTemplateAction(
-                        label='二酸化炭素泉',
-                        data='callback',
-                        text='二酸化炭素泉'
+                        label = '二酸化炭素泉',
+                        data = 'callback',
+                        text = '二酸化炭素泉'
                     ),
                     PostbackTemplateAction(
-                        label='含鉄泉',
-                        data='callback',
-                        text='含鉄泉'
+                        label = '含鉄泉',
+                        data = 'callback',
+                        text = '含鉄泉'
                     )
                 ]
             ),
             CarouselColumn(
-                text='希望する泉質を選択してください',
-                title='希望泉質',
-                actions=[
-                    PostbackTemplateAction(
-                        label='硫黄泉',
-                        data='callback',
-                        text='硫黄泉'
-                    ),
-                    PostbackTemplateAction(
-                        label='酸性泉',
-                        data='callback',
-                        text='酸性泉'
-                    ),
-                    PostbackTemplateAction(
-                        label='放射能泉',
-                        data='callback',
-                        text='放射能泉'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['医療・保健・福祉関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
                 actions = [
                     PostbackTemplateAction(
-                        label = '保険・福祉',
+                        label = '硫黄泉',
                         data = 'callback',
-                        text = '保険・福祉'
+                        text = '硫黄泉'
                     ),
                     PostbackTemplateAction(
-                        label = '救急・医療',
+                        label = '酸性泉',
                         data = 'callback',
-                        text = '救急・医療'
+                        text = '酸性泉'
                     ),
                     PostbackTemplateAction(
-                        label = '障がい者',
+                        label = '放射能泉',
                         data = 'callback',
-                        text = '障がい者'
+                        text = '放射能泉'
                     )
                 ]
             ),
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions =[
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
+                actions = [
                     PostbackTemplateAction(
-                        label = '精神',
+                        label = '含よう素泉',
                         data = 'callback',
-                        text = '精神'
-                    ),
-                    PostbackTemplateAction(
-                        label = '女性',
-                        data = 'callback',
-                        text = '女性'
-                    ),
-                    PostbackTemplateAction(
-                        label = '健康・生活',
-                        data = 'callback',
-                        text = '健康・生活'
+                        text = '含よう素泉'
                     )
                 ]
             )
@@ -332,204 +297,80 @@ def handle_message(event):
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
 
-    elif content in ['震災・復旧・復興関連']:
+    # 「中通り」を受け取った場合の処理
+    elif content in ['中通り']:
         carousel_columns = [
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
                 actions = [
                     PostbackTemplateAction(
-                        label = '原発',
+                        label = '単純温泉',
                         data = 'callback',
-                        text = '原発'
+                        text = '単純温泉'
                     ),
                     PostbackTemplateAction(
-                        label = '生活',
+                        label = '塩化物泉',
                         data = 'callback',
-                        text = '生活'
+                        text = '塩化物泉'
+                    ),
+                    PostbackTemplateAction(
+                        label = '炭酸水素塩泉',
+                        data = 'callback',
+                        text = '炭酸水素塩泉'
                     )
                 ]
             ),
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
                 actions = [
                     PostbackTemplateAction(
-                        label = '企業・経営',
+                        label = '硫酸塩泉',
                         data = 'callback',
-                        text = '企業・経営'
+                        text = '硫酸塩泉'
                     ),
                     PostbackTemplateAction(
-                        label = '復興支援',
+                        label = '二酸化炭素泉',
                         data = 'callback',
-                        text = '復興支援'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['生活関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '事故',
-                        data = 'callback',
-                        text = '事故'
+                        text = '二酸化炭素泉'
                     ),
                     PostbackTemplateAction(
-                        label = '生活・人間関係',
+                        label = '含鉄泉',
                         data = 'callback',
-                        text = '生活・人間関係'
-                    ),  
-                ]
-            ),
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '食品・安全',
-                        data = 'callback',
-                        text = '食品・安全'
-                    ),
-                    PostbackTemplateAction(
-                        label = 'その他',
-                        data = 'callback',
-                        text = 'その他'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['環境関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '環境問題',
-                        data = 'callback',
-                        text = '環境問題'
-                    ),
-                    PostbackTemplateAction(
-                        label = '公害・廃棄物',
-                        data = 'callback',
-                        text = '公害・廃棄物'
-                    ),
-                    PostbackTemplateAction(
-                        label = '環境保全活動',
-                        data = 'callback',
-                        text = '環境保全活動'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['産業・労働・就業関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '労働環境',
-                        data = 'callback',
-                        text = '労働環境'
-                    ),
-                    PostbackTemplateAction(
-                        label = '経営',
-                        data = 'callback',
-                        text = '経営'
-                    ),
-                    PostbackTemplateAction(
-                        label = '産業',
-                        data = 'callback',
-                        text = '産業'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['警察・犯罪関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '安全相談',
-                        data = 'callback',
-                        text = '安全相談'
-                    ),
-                    PostbackTemplateAction(
-                        label = '交通安全',
-                        data = 'callback',
-                        text = '交通安全'
+                        text = '含鉄泉'
                     )
                 ]
             ),
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
                 actions = [
                     PostbackTemplateAction(
-                        label = 'いじめ・子ども相談',
+                        label = '硫黄泉',
                         data = 'callback',
-                        text = 'いじめ・子ども相談'
+                        text = '硫黄泉'
                     ),
                     PostbackTemplateAction(
-                        label = '犯罪関連',
+                        label = '酸性泉',
                         data = 'callback',
-                        text = '犯罪関連'
+                        text = '酸性泉'
+                    ),
+                    PostbackTemplateAction(
+                        label = '放射能泉',
+                        data = 'callback',
+                        text = '放射能泉'
                     )
                 ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-    
-    elif content in ['パスポート・外国人関連']:
-        carousel_columns = [
+            ),
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
                 actions = [
                     PostbackTemplateAction(
-                        label = 'パスポート',
+                        label = '含よう素泉',
                         data = 'callback',
-                        text = 'パスポート'
-                    ),
-                    PostbackTemplateAction(
-                        label = '外国人向け相談窓口',
-                        data = 'callback',
-                        text = '外国人向け相談窓口'
+                        text = '含よう素泉'
                     )
                 ]
             )
@@ -540,26 +381,80 @@ def handle_message(event):
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
 
-    elif content in ['教育関連']:
+    # 「浜通り」を受け取った場合の処理
+    elif content in ['浜通り']:
         carousel_columns = [
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
                 actions = [
                     PostbackTemplateAction(
-                        label = '教育相談',
+                        label = '単純温泉',
                         data = 'callback',
-                        text = '教育相談'
+                        text = '単純温泉'
                     ),
                     PostbackTemplateAction(
-                        label = '障がい児関連',
+                        label = '塩化物泉',
                         data = 'callback',
-                        text = '障がい児関連'
+                        text = '塩化物泉'
                     ),
                     PostbackTemplateAction(
-                        label = '調査・文化財',
+                        label = '炭酸水素塩泉',
                         data = 'callback',
-                        text = '調査・文化財'
+                        text = '炭酸水素塩泉'
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
+                actions = [
+                    PostbackTemplateAction(
+                        label = '硫酸塩泉',
+                        data = 'callback',
+                        text = '硫酸塩泉'
+                    ),
+                    PostbackTemplateAction(
+                        label = '二酸化炭素泉',
+                        data = 'callback',
+                        text = '二酸化炭素泉'
+                    ),
+                    PostbackTemplateAction(
+                        label = '含鉄泉',
+                        data = 'callback',
+                        text = '含鉄泉'
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
+                actions = [
+                    PostbackTemplateAction(
+                        label = '硫黄泉',
+                        data = 'callback',
+                        text = '硫黄泉'
+                    ),
+                    PostbackTemplateAction(
+                        label = '酸性泉',
+                        data = 'callback',
+                        text = '酸性泉'
+                    ),
+                    PostbackTemplateAction(
+                        label = '放射能泉',
+                        data = 'callback',
+                        text = '放射能泉'
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text = '希望する泉質を選択してください',
+                title = '泉質名を選択',
+                actions = [
+                    PostbackTemplateAction(
+                        label = '含よう素泉',
+                        data = 'callback',
+                        text = '含よう素泉'
                     )
                 ]
             )
