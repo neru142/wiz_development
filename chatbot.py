@@ -205,7 +205,12 @@ def handle_message(event):
                         label='景色',
                         data='callback',
                         text='景色'
-                    )
+                    ),
+                    PostbackTemplateAction(
+                        label='景色',
+                        data='callback',
+                        text='景色'
+                    ) 
                 ]
             ),
             CarouselColumn(
