@@ -19,12 +19,13 @@ from linebot.models import (
 app = Flask(__name__)
 
 # 環境変数取得
-YOUR_CHANNEL_ACCESS_TOKEN = os.environ["YOUR_CHANNEL_ACCESS_TOKEN"]
-YOUR_CHANNEL_SECRET = os.environ["YOUR_CHANNEL_SECRET"]
+# 環境変数取得
+ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
+CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(YOUR_CHANNEL_SECRET)
+line_bot_api = LineBotApi(ACCESS_TOKEN)
+handler = WebhookHandler(CHANNEL_SECRET)
 
 # 温泉のjson1ファイルを取得
 
