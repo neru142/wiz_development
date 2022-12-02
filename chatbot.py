@@ -1,6 +1,7 @@
 from flask import Flask, request, abort
 import os
 import psycopg2
+import json
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -18,13 +19,18 @@ from linebot.models import (
 app = Flask(__name__)
 
 # 環境変数取得
-ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
-CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
+YOUR_CHANNEL_ACCESS_TOKEN = os.environ["YOUR_CHANNEL_ACCESS_TOKEN"]
+YOUR_CHANNEL_SECRET = os.environ["YOUR_CHANNEL_SECRET"]
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-line_bot_api = LineBotApi(ACCESS_TOKEN)
-handler = WebhookHandler(CHANNEL_SECRET)
+line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
+# 温泉のjson1ファイルを取得
+
+with open('onsendate.json')as f:
+    jsn =json.load(f)
+    
 # Pythonでは呼び出す行より上に記述しないとエラーになる
 
 # リストをn個ずつのサブリストに分割する
@@ -37,13 +43,6 @@ def split_list(l, n):
 # 窓口リストを表示する関数
 def window_list_flex(db):
     db.append(
-        (1,1,1,
-        '見つからない場合はこちら',
-        '県の総合的な相談窓口',
-        '県庁県政相談コーナー',
-        '0120-899-721\nkenseisoudan@pref.fukushima.lg.jp',
-        '月～金\n9:00～12:00\n13:00～16:00\n(祝日、年末年始を除く)',
-        0,'2021-12-10 02:37:02.388856')
         )
     db_column = list(split_list(db, 10))
 
@@ -160,32 +159,43 @@ def handle_follow(event):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=profile.display_name + "さん、はじめまして！\n" +
-        "友だち追加ありがとうございます。温泉情報botです。\n" +
-        "福島県の温泉を探す場合、まずは「温泉を探す」をタップしてください。\n" +
-        "泉質名についての説明が欲しい場合は、helpをタップしてください。")
+        "友だち追加ありがとうございます。福島温泉情報bot（仮）です。\n" +
+        "温泉の情報を探したい場合は、まずは「温泉を探す」をタップしてください。")
     )
 
 # メッセージイベントの場合の処理
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     content = event.message.text # メッセージの内容を取得する
+   
     if content in ['温泉を探す']:
         carousel_columns = [
             CarouselColumn(
-                text='希望の地方を選択する',
-                title='地方選択',
+                text='希望する地方を選択してください',
+                title='会津で検索',
                 actions=[
                     PostbackTemplateAction(
                         label='会津',
                         data='callback',
-                        text='会津'
-                        
-                    ),
+                        text='会津'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する地方を選択してください',
+                title='中通りで検索',
+                actions=[
                     PostbackTemplateAction(
                         label='中通り',
                         data='callback',
                         text='中通り'
-                    ),
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する地方を選択してください',
+                title='浜通りで検索',
+                actions=[
                     PostbackTemplateAction(
                         label='浜通り',
                         data='callback',
@@ -193,261 +203,1185 @@ def handle_message(event):
                     )
                 ]
             ),
-             CarouselColumn(
-                text='場所より景色や泉質で検索',
-                title='地域指定がない方',
+            CarouselColumn(
+                text='希望する地方を選択してください',
+                title='希望なし',
                 actions=[
                     PostbackTemplateAction(
-                        label='景色',
+                        label='場所無し',
                         data='callback',
-                        text='景色'
-                    ),
+                        text='場所無し'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+##--------------------------------------------------------------------------------------------------------------------------------------
+#阿部スペース
+    #「会津」に対しての返信 「求める景色」について質問する
+    elif content in ['会津']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='景色で検索',
+                actions=[
                     PostbackTemplateAction(
-                        label='温泉の泉質',
+                        label='会津.雪景色',
                         data='callback',
-                        text='温泉の泉質'
-                    ),
+                        text='会津.雪景色'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='景色で検索',
+                actions=[
                     PostbackTemplateAction(
-                        label='そのうち追加',
+                        label='会津.紅葉',
                         data='callback',
-                        text='そのうち追加'
-                    )
-                ]
-             )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['医療・保健・福祉関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '保険・福祉',
-                        data = 'callback',
-                        text = '保険・福祉'
-                    ),
-                    PostbackTemplateAction(
-                        label = '救急・医療',
-                        data = 'callback',
-                        text = '救急・医療'
-                    ),
-                    PostbackTemplateAction(
-                        label = '障がい者',
-                        data = 'callback',
-                        text = '障がい者'
+                        text='会津.紅葉'   
                     )
                 ]
             ),
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions =[
+                text='希望する景色を選択してください',
+                title='景色で検索',
+                actions=[
                     PostbackTemplateAction(
-                        label = '精神',
-                        data = 'callback',
-                        text = '精神'
-                    ),
-                    PostbackTemplateAction(
-                        label = '女性',
-                        data = 'callback',
-                        text = '女性'
-                    ),
-                    PostbackTemplateAction(
-                        label = '健康・生活',
-                        data = 'callback',
-                        text = '健康・生活'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['震災・復旧・復興関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '原発',
-                        data = 'callback',
-                        text = '原発'
-                    ),
-                    PostbackTemplateAction(
-                        label = '生活',
-                        data = 'callback',
-                        text = '生活'
+                        label='会津.夜空',
+                        data='callback',
+                        text='会津.夜空'
                     )
                 ]
             ),
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
+                text='希望する景色を選択してください',
+                title='景色で検索',
+                actions=[
                     PostbackTemplateAction(
-                        label = '企業・経営',
-                        data = 'callback',
-                        text = '企業・経営'
-                    ),
-                    PostbackTemplateAction(
-                        label = '復興支援',
-                        data = 'callback',
-                        text = '復興支援'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['生活関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '事故',
-                        data = 'callback',
-                        text = '事故'
-                    ),
-                    PostbackTemplateAction(
-                        label = '生活・人間関係',
-                        data = 'callback',
-                        text = '生活・人間関係'
-                    ),  
-                ]
-            ),
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '食品・安全',
-                        data = 'callback',
-                        text = '食品・安全'
-                    ),
-                    PostbackTemplateAction(
-                        label = 'その他',
-                        data = 'callback',
-                        text = 'その他'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['環境関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '環境問題',
-                        data = 'callback',
-                        text = '環境問題'
-                    ),
-                    PostbackTemplateAction(
-                        label = '公害・廃棄物',
-                        data = 'callback',
-                        text = '公害・廃棄物'
-                    ),
-                    PostbackTemplateAction(
-                        label = '環境保全活動',
-                        data = 'callback',
-                        text = '環境保全活動'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['産業・労働・就業関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '労働環境',
-                        data = 'callback',
-                        text = '労働環境'
-                    ),
-                    PostbackTemplateAction(
-                        label = '経営',
-                        data = 'callback',
-                        text = '経営'
-                    ),
-                    PostbackTemplateAction(
-                        label = '産業',
-                        data = 'callback',
-                        text = '産業'
-                    )
-                ]
-            )
-        ]
-        message_template = CarouselTemplate(columns=carousel_columns)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TemplateSendMessage(alt_text='carousel template', template=message_template)
-        )
-
-    elif content in ['警察・犯罪関連']:
-        carousel_columns = [
-            CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
-                    PostbackTemplateAction(
-                        label = '安全相談',
-                        data = 'callback',
-                        text = '安全相談'
-                    ),
-                    PostbackTemplateAction(
-                        label = '交通安全',
-                        data = 'callback',
-                        text = '交通安全'
+                        label='会津.川 or 海',
+                        data='callback',
+                        text='会津.川 or 海'
                     )
                 ]
             ),
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
+                text='希望する景色を選択してください',
+                title='景色で検索',
+                actions=[
                     PostbackTemplateAction(
-                        label = 'いじめ・子ども相談',
-                        data = 'callback',
-                        text = 'いじめ・子ども相談'
-                    ),
+                        label='会津.森',
+                        data='callback',
+                        text='会津.森'
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='希望なし',
+                actions=[
                     PostbackTemplateAction(
-                        label = '犯罪関連',
-                        data = 'callback',
-                        text = '犯罪関連'
+                        label='会津.景色なし',
+                        data='callback',
+                        text='会津.景色なし'
                     )
                 ]
             )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+        
+    
+
+
+        
+    
+
+
+   
+#------------------------------------------------------------------------------------------------------------------------------------------------
+##佐久間スペース
+##「浜通り」と受け取った時の処理
+    elif content in ['浜通り']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='景色で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.雪景色',
+                        data='callback',
+                        text='浜通り.雪景色'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.紅葉',
+                        data='callback',
+                        text='浜通り.紅葉'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.夜空',
+                        data='callback',
+                        text='浜通り.夜空'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='景色で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.川 or 海',
+                        data='callback',
+                        text='浜通り.川 or 海'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.森',
+                        data='callback',
+                        text='浜通り.森'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.スキップ',
+                        data='callback',
+                        text='浜通り.スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+    ##「浜通り.雪景色」と受け取った時の処理
+    elif content in ['浜通り.雪景色']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.雪景色.美肌',
+                        data='callback',
+                        text='浜通り.雪景色.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.雪景色.傷',
+                        data='callback',
+                        text='浜通り.雪景色.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.雪景色.貧血',
+                        data='callback',
+                        text='浜通り.雪景色.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.雪景色.生活習慣病',
+                        data='callback',
+                        text='浜通り.雪景色.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.雪景色.皮膚病',
+                        data='callback',
+                        text='浜通り.雪景色.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.雪景色.スキップ',
+                        data='callback',
+                        text='浜通り.雪景色.スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,  
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+    ##「浜通り.紅葉」と受け取った時の処理
+    elif content in ['浜通り.紅葉']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.紅葉.美肌',
+                        data='callback',
+                        text='浜通り.紅葉.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.紅葉.傷',
+                        data='callback',
+                        text='浜通り.紅葉.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.紅葉.貧血',
+                        data='callback',
+                        text='浜通り.紅葉.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.紅葉.生活習慣病',
+                        data='callback',
+                        text='浜通り.紅葉.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.紅葉.皮膚病',
+                        data='callback',
+                        text='浜通り.紅葉.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.紅葉.スキップ',
+                        data='callback',
+                        text='浜通り.紅葉.スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,  
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+    ##「浜通り.夜空」と受け取った時の処理
+    elif content in ['浜通り.夜空']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.夜空.美肌',
+                        data='callback',
+                        text='浜通り.夜空.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.夜空.傷',
+                        data='callback',
+                        text='浜通り.夜空.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.夜空.貧血',
+                        data='callback',
+                        text='浜通り.夜空.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.夜空.生活習慣病',
+                        data='callback',
+                        text='浜通り.夜空.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.夜空.皮膚病',
+                        data='callback',
+                        text='浜通り.夜空.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.夜空.スキップ',
+                        data='callback',
+                        text='浜通り.夜空.スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,  
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+    ##「浜通り.川 or 海」と受け取った時の処理
+    elif content in ['浜通り.川 or 海']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.川 or 海.美肌',
+                        data='callback',
+                        text='浜通り.川 or 海.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.川 or 海.傷',
+                        data='callback',
+                        text='浜通り.川 or 海.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.川 or 海.貧血',
+                        data='callback',
+                        text='浜通り.川 or 海.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.川 or 海.生活習慣病',
+                        data='callback',
+                        text='浜通り.川 or 海.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.川 or 海.皮膚病',
+                        data='callback',
+                        text='浜通り.川 or 海.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.川 or 海.スキップ',
+                        data='callback',
+                        text='浜通り.川 or 海.スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,  
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+    ##「浜通り.森」と受け取った時の処理
+    elif content in ['浜通り.森']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.森.美肌',
+                        data='callback',
+                        text='浜通り.森.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.森.傷',
+                        data='callback',
+                        text='浜通り.森.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.森.貧血',
+                        data='callback',
+                        text='浜通り.森.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.森.生活習慣病',
+                        data='callback',
+                        text='浜通り.森.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.森.皮膚病',
+                        data='callback',
+                        text='浜通り.森.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.森.スキップ',
+                        data='callback',
+                        text='浜通り.森.スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,  
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+    ##「浜通り.スキップ」と受け取った時の処理
+    elif content in ['浜通り.スキップ']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.スキップ.美肌',
+                        data='callback',
+                        text='浜通り.スキップ.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.スキップ.傷',
+                        data='callback',
+                        text='浜通り.スキップ.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.スキップ.貧血',
+                        data='callback',
+                        text='浜通り.スキップ.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.スキップ.生活習慣病',
+                        data='callback',
+                        text='浜通り.スキップ.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.スキップ.皮膚病',
+                        data='callback',
+                        text='浜通り.スキップ.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='浜通り.スキップ.スキップ',
+                        data='callback',
+                        text='浜通り.スキップ.スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,  
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+
+
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------
+##水戸スペース
+##中通りと受け取った時の処理
+    elif content in ['中通り']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='景色で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.雪景色',
+                        data='callback',
+                        text='中通り.雪景色'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.紅葉',
+                        data='callback',
+                        text='中通り.紅葉'   
+                    )
+                ],
+                
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.夜空',
+                        data='callback',
+                        text='中通り.夜空'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='景色で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.川 or海',
+                        data='callback',
+                        text='中通り.川 or 海'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.森',
+                        data='callback',
+                        text='中通り.森'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.スキップ',
+                        data='callback',
+                        text='中通り.スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+    )
+##中通り.雪景色を受け取った時の処理
+    elif content in ['中通り.雪景色']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する泉質名を選択してください',
+                title='泉質名で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.雪景色.美肌',
+                        data='callback',
+                        text='中通り.雪景色。美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.雪景色.傷',
+                        data='callback',
+                        text='中通り.雪景色.傷'   
+                    )
+                ],
+                
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.雪景色.貧血',
+                        data='callback',
+                        text='中通り.雪景色.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='景色で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.雪景色.生活習慣病',
+                        data='callback',
+                        text='中通り.雪景色.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.雪景色.皮膚病',
+                        data='callback',
+                        text='中通り.雪景色.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.雪景色.スキップ',
+                        data='callback',
+                        text='中通り.雪景色.スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+        ##「中通り.紅葉」と受け取った時の処理
+    elif content in ['中通り.紅葉']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.紅葉.美肌',
+                        data='callback',
+                        text='中通り.紅葉.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.紅葉.傷',
+                        data='callback',
+                        text='中通り.紅葉.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.紅葉.貧血',
+                        data='callback',
+                        text='中通り.紅葉.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.紅葉.生活習慣病',
+                        data='callback',
+                        text='中通り.紅葉.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.紅葉.皮膚病',
+                        data='callback',
+                        text='中通り.紅葉.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.紅葉.効能スキップ',
+                        data='callback',
+                        text='中通り.紅葉.効能スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+    )
+    ##「中通り.夜空」と受け取った時の処理
+    elif content in ['中通り.夜空']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.夜空.美肌',
+                        data='callback',
+                        text='中通り.夜空.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.夜空.傷',
+                        data='callback',
+                        text='中通り.夜空.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.夜空.貧血',
+                        data='callback',
+                        text='中通り.夜空.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.夜空.生活習慣病',
+                        data='callback',
+                        text='中通り.夜空.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.夜空.皮膚病',
+                        data='callback',
+                        text='中通り.夜空.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.夜空.効能スキップ',
+                        data='callback',
+                        text='中通り.夜空.効能スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,  
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+        ##「中通り.川 or 海」と受け取った時の処理
+    elif content in ['中通り.川 or 海']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.川 or 海.美肌',
+                        data='callback',
+                        text='中通り.川 or 海.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.川 or 海.傷',
+                        data='callback',
+                        text='中通り.川 or 海.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.川 or 海.貧血',
+                        data='callback',
+                        text='中通り.川 or 海.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.川 or 海.生活習慣病',
+                        data='callback',
+                        text='中通り.川 or 海.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.川 or 海.皮膚病',
+                        data='callback',
+                        text='中通り.川 or 海.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.川 or 海.効能スキップ',
+                        data='callback',
+                        text='中通り.川 or 海.効能スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,  
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+        ##「中通り.森」と受け取った時の処理
+    elif content in ['中通り.森']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.森.美肌',
+                        data='callback',
+                        text='中通り.森.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.森.傷',
+                        data='callback',
+                        text='中通り.森.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.森.貧血',
+                        data='callback',
+                        text='中通り.森.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する効能を選択してください',
+                title='効能で検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.森.生活習慣病',
+                        data='callback',
+                        text='中通り.森.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.森.皮膚病',
+                        data='callback',
+                        text='中通り.森.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='中通り.森.効能スキップ',
+                        data='callback',
+                        text='中通り.森.効能スキップ'
+                    )
+                ]
+            )
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,  
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------
+##ヤナイスペース
+#「場所無し」分岐
+#「場所無し」と受け取った場合の処理
+    elif content in ['場所無し']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色',
+                        data='callback',
+                        text='場所無し.雪景色'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.紅葉',
+                        data='callback',
+                        text='場所無し.紅葉'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.夜空',
+                        data='callback',
+                        text='場所無し.夜空'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.川 or 海',
+                        data='callback',
+                        text='場所無し.川 or 海'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.森',
+                        data='callback',
+                        text='場所無し.森'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ',
+                        data='callback',
+                        text='場所無し.スキップ'
+                    )
+                ]
+            )     
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+#「場所無し.雪景色」と受け取った場合の処理
+    elif content in ['場所無し.雪景色']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.美肌',
+                        data='callback',
+                        text='場所無し.雪景色.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.傷',
+                        data='callback',
+                        text='場所無し.雪景色.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.貧血',
+                        data='callback',
+                        text='場所無し.雪景色.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.生活習慣病',
+                        data='callback',
+                        text='場所無し.雪景色.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.皮膚病',
+                        data='callback',
+                        text='場所無し.雪景色.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.スキップ',
+                        data='callback',
+                        text='場所無し.雪景色.スキップ'
+                    )
+                ]
+            )     
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+    #「場所無し.紅葉」と受け取った場合の処理
+    elif content in ['場所無し.紅葉']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.紅葉.美肌',
+                        data='callback',
+                        text='場所無し.紅葉.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.紅葉.傷',
+                        data='callback',
+                        text='場所無し.紅葉.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.紅葉.貧血',
+                        data='callback',
+                        text='場所無し.紅葉.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.川 or 海.生活習慣病',
+                        data='callback',
+                        text='場所無し.川 or 海.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.森.皮膚病',
+                        data='callback',
+                        text='場所無し.森.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ.スキップ',
+                        data='callback',
+                        text='場所無し.スキップ.スキップ'
+                    )
+                ]
+            )     
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+    #「場所無し.夜空」と受け取った場合の処理
+    elif content in ['場所無し.夜空']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.夜空.美肌',
+                        data='callback',
+                        text='場所無し.夜空.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.夜空.傷',
+                        data='callback',
+                        text='場所無し.夜空.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.夜空.貧血',
+                        data='callback',
+                        text='場所無し.夜空.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.夜空.生活習慣病',
+                        data='callback',
+                        text='場所無し.夜空.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.夜空.皮膚病',
+                        data='callback',
+                        text='場所無し.夜空.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.夜空.スキップ',
+                        data='callback',
+                        text='場所無し.夜空.スキップ'
+                    )
+                ]
+            )     
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+    #「場所無し.川 or 海」と受け取った場合の処理
+    elif content in ['場所無し.川 or 海']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.川 or 海.美肌',
+                        data='callback',
+                        text='場所無し.川 or 海.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.川 or 海.傷',
+                        data='callback',
+                        text='場所無し.川 or 海.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.川 or 海.貧血',
+                        data='callback',
+                        text='場所無し.川 or 海.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.川 or 海.生活習慣病',
+                        data='callback',
+                        text='場所無し.川 or 海.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.川 or 海.皮膚病',
+                        data='callback',
+                        text='場所無し.川 or 海.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.川 or 海.スキップ',
+                        data='callback',
+                        text='場所無し.川 or 海.スキップ'
+                    )
+                ]
+            )     
         ]
         message_template = CarouselTemplate(columns=carousel_columns)
         line_bot_api.reply_message(
@@ -455,24 +1389,59 @@ def handle_message(event):
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
     
-    elif content in ['パスポート・外国人関連']:
+    #「場所無し.森」と受け取った場合の処理
+    elif content in ['場所無し.森']:
         carousel_columns = [
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
                     PostbackTemplateAction(
-                        label = 'パスポート',
-                        data = 'callback',
-                        text = 'パスポート'
-                    ),
+                        label='場所無し.森.美肌',
+                        data='callback',
+                        text='場所無し.森.美肌'   
+                    )
+                ],
+                actions=[
                     PostbackTemplateAction(
-                        label = '外国人向け相談窓口',
-                        data = 'callback',
-                        text = '外国人向け相談窓口'
+                        label='場所無し.森.傷',
+                        data='callback',
+                        text='場所無し.森.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.森.貧血',
+                        data='callback',
+                        text='場所無し.森.貧血'   
                     )
                 ]
-            )
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.森.生活習慣病',
+                        data='callback',
+                        text='場所無し.森.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.森.皮膚病',
+                        data='callback',
+                        text='場所無し.森.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.森.スキップ',
+                        data='callback',
+                        text='場所無し.森.スキップ'
+                    )
+                ]
+            )     
         ]
         message_template = CarouselTemplate(columns=carousel_columns)
         line_bot_api.reply_message(
@@ -480,38 +1449,201 @@ def handle_message(event):
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
 
-    elif content in ['教育関連']:
+     #「場所無し.スキップ」と受け取った場合の処理
+    elif content in ['場所無し.スキップ']:
         carousel_columns = [
             CarouselColumn(
-                text = '分野を選択してください',
-                title = '分野選択',
-                actions = [
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
                     PostbackTemplateAction(
-                        label = '教育相談',
-                        data = 'callback',
-                        text = '教育相談'
-                    ),
+                        label='場所無し.スキップ.美肌',
+                        data='callback',
+                        text='場所無し.スキップ.美肌'   
+                    )
+                ],
+                actions=[
                     PostbackTemplateAction(
-                        label = '障がい児関連',
-                        data = 'callback',
-                        text = '障がい児関連'
-                    ),
+                        label='場所無し.スキップ.傷',
+                        data='callback',
+                        text='場所無し.スキップ.傷'   
+                    )
+                ],
+                actions=[
                     PostbackTemplateAction(
-                        label = '調査・文化財',
-                        data = 'callback',
-                        text = '調査・文化財'
+                        label='場所無し.スキップ.貧血',
+                        data='callback',
+                        text='場所無し.スキップ.貧血'   
                     )
                 ]
-            )
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ.生活習慣病',
+                        data='callback',
+                        text='場所無し.スキップ.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ.皮膚病',
+                        data='callback',
+                        text='場所無し.スキップ.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ.スキップ',
+                        data='callback',
+                        text='場所無し.スキップ.スキップ'
+                    )
+                ]
+            )     
         ]
         message_template = CarouselTemplate(columns=carousel_columns)
         line_bot_api.reply_message(
             event.reply_token,
             TemplateSendMessage(alt_text='carousel template', template=message_template)
         )
+
+
+     #「場所無し.スキップ」と受け取った場合の処理
+    elif content in ['場所無し.スキップ']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ.美肌',
+                        data='callback',
+                        text='場所無し.スキップ.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ.傷',
+                        data='callback',
+                        text='場所無し.スキップ.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ.貧血',
+                        data='callback',
+                        text='場所無し.スキップ.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ.生活習慣病',
+                        data='callback',
+                        text='場所無し.スキップ.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ.皮膚病',
+                        data='callback',
+                        text='場所無し.スキップ.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.スキップ.スキップ',
+                        data='callback',
+                        text='場所無し.スキップ.スキップ'
+                    )
+                ]
+            )     
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+     #「場所無し.雪景色.美肌」と受け取った場合の処理
+    elif content in ['場所無し.雪景色.美肌']:
+        carousel_columns = [
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.美肌',
+                        data='callback',
+                        text='場所無し.雪景色.美肌'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.傷',
+                        data='callback',
+                        text='場所無し.雪景色.傷'   
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.貧血',
+                        data='callback',
+                        text='場所無し.雪景色.貧血'   
+                    )
+                ]
+            ),
+            CarouselColumn(
+                text='希望する景色を選択してください',
+                title='タップで検索',
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.生活習慣病',
+                        data='callback',
+                        text='場所無し.雪景色.生活習慣病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.皮膚病',
+                        data='callback',
+                        text='場所無し.雪景色.皮膚病'
+                    )
+                ],
+                actions=[
+                    PostbackTemplateAction(
+                        label='場所無し.雪景色.スキップ',
+                        data='callback',
+                        text='場所無し.雪景色.スキップ'
+                    )
+                ]
+            )     
+        ]
+        message_template = CarouselTemplate(columns=carousel_columns)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TemplateSendMessage(alt_text='carousel template', template=message_template)
+        )
+
+
+##　　　ここから下は触らない
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
     # 以下サブカテゴリ
-    elif content in ['保険・福祉']:
+    elif content in ['会津']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 21 ORDER BY Id ASC")
@@ -524,7 +1656,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['救急・医療']:
+    elif content in ['中通り']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 22 ORDER BY Id ASC")
@@ -537,7 +1669,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['障がい者']:
+    elif content in ['浜通り']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 23 ORDER BY Id ASC")
@@ -550,7 +1682,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['精神']:
+    elif content in ['肩こり解消']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 24 ORDER BY Id ASC")
@@ -563,7 +1695,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
     
-    elif content in ['女性']:
+    elif content in ['肌に良い']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 25 ORDER BY Id ASC")
@@ -576,7 +1708,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['健康・生活']:
+    elif content in ['雪景色']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 26 ORDER BY Id ASC")
@@ -589,7 +1721,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['原発']:
+    elif content in ['紅葉']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 31 ORDER BY Id ASC")
@@ -602,7 +1734,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['生活']:
+    elif content in ['熱い']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 32 ORDER BY Id ASC")
@@ -615,7 +1747,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['企業・経営']:
+    elif content in ['ぬるい']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 33 ORDER BY Id ASC")
@@ -628,7 +1760,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['復興支援']:
+    elif content in ['高い']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 34 ORDER BY Id ASC")
@@ -641,7 +1773,7 @@ def handle_message(event):
             FlexSendMessage(alt_text='flex template', contents=result)
         )
 
-    elif content in ['事故']:
+    elif content in ['安い']:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as curs:
                 curs.execute("SELECT * FROM window_list WHERE subcategory = 41 ORDER BY Id ASC")
@@ -653,6 +1785,33 @@ def handle_message(event):
             event.reply_token,
             FlexSendMessage(alt_text='flex template', contents=result)
         )
+
+
+
+
+
+
+
+
+
+
+
+
+##----------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     elif content in ['生活・人間関係']:
         with psycopg2.connect(DATABASE_URL) as conn:
@@ -875,6 +2034,33 @@ def handle_message(event):
             event.reply_token,
             FlexSendMessage(alt_text='flex template', contents=result)
         )
+
+
+
+
+
+
+
+
+
+
+
+##------------------------------------------------------------------
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     # 以下 下位分類のあるサブカテゴリ
     elif content in ['産業']:
@@ -1148,7 +2334,7 @@ def handle_message(event):
 
     # 「最初から」がタップされた場合の処理
     elif content in ['最初から']:
-        response = "改めて窓口を探す際には、もう一度「温泉を探す」をタップしてください。"
+        response = "改めて窓口を探す際には、もう一度「カテゴリ選択」をタップしてください。"
 
         line_bot_api.reply_message(
             event.reply_token,
