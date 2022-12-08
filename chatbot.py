@@ -88,13 +88,23 @@ def handle_message(event):
                 ]
             ),
              CarouselColumn(
-                text='景色、泉質などで検索',
+                text='場所より景色や泉質で検索',
                 title='地域指定がない方',
                 actions=[
                     PostbackTemplateAction(
-                        label='特になし',
+                        label='景色',
                         data='callback',
-                        text='特になし'
+                        text='景色'
+                    ),
+                    PostbackTemplateAction(
+                        label='温泉の泉質',
+                        data='callback',
+                        text='温泉の泉質'
+                    ),
+                    PostbackTemplateAction(
+                        label='Coming soon',
+                        data='callback',
+                        text='Coming soon'
                     )
                 ]
              )
